@@ -18,6 +18,7 @@ cities <- cities %>%
 year_range <- range(counties$year)
 eviction_rate_range <- range(counties$eviction.rate, na.rm = TRUE)
 
+
 ui <- fluidPage(
   titlePanel("Eviction Rates"),
   
@@ -27,7 +28,7 @@ ui <- fluidPage(
                 min = year_range[1],
                 max = year_range[2],
                 value = year_range
-                ),
+    ),
     sliderInput("eviction_rate",
                 label = "Eviction Rate",
                 min = eviction_rate_range[1],
@@ -35,31 +36,51 @@ ui <- fluidPage(
                 value = eviction_rate_range
     )
   ),
-
-
+  
   mainPanel(
-
-    plotOutput("plot")
+    plotOutput("plot", click = "plot_click"),
+    textOutput("selected")
+    #p("Highlighting:", strong(textOutput("selected", inline = TRUE)))
+    
   )
   
-
+  
+  
+  
 )
 
 server <- function(input, output) {
-
+  
+  data <- reactiveValues()
+  data$selected_year <- ""
   
   output$plot <- renderPlot({
+  
     results_data <- counties %>%
-      filter(year > input$year[1] & year < input$year[2])
-
-    p <- ggplot(data = results_data) +
-        geom_point((mapping = aes(x = year, y = eviction.rate, color = median.household.income))) +
-        scale_color_gradientn(colors = c("blue", "orange"))
-    p
-
-
+      filter(year > input$year[1] & year < input$year[2], 
+             eviction.rate > input$eviction_rate[1] & eviction.rate < input$eviction_rate[2]) 
+    
+    ggplot(data = results_data, mapping = aes(x = poverty.rate, y = eviction.rate)) +
+      geom_point(aes(color = (year %in% data$selected_year))) +
+      guides(color = FALSE)
+    
+    
   })
-
+  
+  output$selected <- renderText({
+    data$selected_year
+    
+    
+  })
+  
+  observeEvent(input$plot_click, {
+    selected <- nearPoints(counties, input$plot_click)
+    data$selected_year <- unique(selected$year)
+    
+    
+    
+  })
+  
 }
 
 
