@@ -2,6 +2,7 @@ library(shiny)
 library(ggplot2)
 library(dplyr)
 library(maps)
+library(tidyr)
 
 
 ### Read in and Clean Data
@@ -13,15 +14,23 @@ counties <- read.csv("data/evictionlab-us-counties.csv", stringsAsFactors = FALS
 counties <- counties %>% 
   filter(parent.location == "Washington") 
 
-years <- unique(counties$year)
+counties_long <- gather(counties, 
+                        key = pct.by.race,  
+                        value = pct.pop, 
+                        c(pct.white:pct.other )
+                        )
 
-eviction_rate_range <- range(counties$eviction.rate, na.rm = TRUE)
+years <- unique(counties_long$year)
+races <- unique(counties_long$pct.by.race)
+
+eviction_rate_range <- range(counties_long$eviction.rate, na.rm = TRUE)
 
 ui <- fluidPage(
   titlePanel("Eviction Rates"),
   
   sidebarLayout(
-    selectInput("year", label = "Select Year", choices = years),
+    #selectInput("year", label = "Select Year", choices = years),
+    selectInput("race", label = "Select Race", choices = races),
     
     sliderInput("eviction_rate",
                 label = "Eviction Rate",
@@ -29,7 +38,7 @@ ui <- fluidPage(
                 max = eviction_rate_range[2],
                 value = eviction_rate_range
     ), 
-
+    
   ),
   
   mainPanel(
@@ -44,11 +53,11 @@ ui <- fluidPage(
                            and Adam Porton. The Eviction Lab is funded by the JPB, Gates, 
                            and Ford Foundations as well as the Chan Zuckerberg Initiative. 
                            More information is found at evictionlab.org."))
+                         )
+    
+                         )
+  
                 )
-  
-  )
-  
-)
 
 server <- function(input, output) {
   
@@ -57,11 +66,12 @@ server <- function(input, output) {
   
   output$plot <- renderPlot({
     
-    results_data <- counties %>%
+    results_data <- counties_long %>%
       filter(eviction.rate >= input$eviction_rate[1] & eviction.rate <= input$eviction_rate[2])
     
-    results_data <- counties[counties$year == input$year,  ]
-
+    #results_data <- counties[counties$year == input$year,  ]
+    results_data <- counties_long[counties_long$pct.by.race == input$race, ]
+    
     ggplot(data = results_data, mapping = aes(x = poverty.rate, y = eviction.rate)) +
       geom_point(aes(color = (year %in% data$selected_year))) +
       guides(color = FALSE)
@@ -69,12 +79,13 @@ server <- function(input, output) {
   })
   
   output$table <- renderDataTable({
-    results_data <- counties %>%
+    results_data <- counties_long %>%
       filter(eviction.rate >= input$eviction_rate[1] & eviction.rate <= input$eviction_rate[2])
     
-    results_data <- counties[counties$year == input$year,  ]
+    #results_data <- counties[counties$year == input$year,  ]
+    results_data <- counties_long[counties_long$pct.by.race == input$race, ]
     results_data
-
+    
     
   })
   
@@ -84,12 +95,13 @@ server <- function(input, output) {
   })
   
   observeEvent(input$plot_click, {
-    selected <- nearPoints(counties, input$plot_click)
+    selected <- nearPoints(counties_long, input$plot_click)
     data$selected_year <- unique(selected$year)
     
   })
   
 }
+
 
 
 shinyApp(ui, server)
