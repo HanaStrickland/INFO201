@@ -40,7 +40,8 @@ ui <- fluidPage(
   mainPanel(
     tabsetPanel(type = "tabs",
                 tabPanel("Plot", plotOutput("plot", click = "plot_click"),
-                         p("Highlighting:", strong(textOutput("selected", inline = TRUE)))),
+                         p("Highlighting:", strong(textOutput("selected", inline = TRUE))
+                           )),
                 tabPanel("Table", dataTableOutput("table")),
                 tabPanel("Dataset Information",
                          p("This research uses data from The Eviction Lab at Princeton University,
@@ -90,7 +91,14 @@ server <- function(input, output) {
 
   observeEvent(input$plot_click, {
     selected <- nearPoints(counties, input$plot_click)
-    data$selected_county <- unique(selected$name)
+    data$selected_county <- 
+      paste(unique(selected$name), 
+             "Population:", unique(selected$population),
+             "Poverty Rate: ", unique(selected$poverty.rate),
+             "Rent Burden: ", unique(selected$rent.burden), 
+            "Eviction Rate: ", unique(selected$eviction.rate),
+            sep = "\n"
+            )
 
   })
 
