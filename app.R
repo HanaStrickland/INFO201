@@ -12,14 +12,21 @@ counties <- read.csv("data/evictionlab-us-counties.csv", stringsAsFactors = FALS
 
 # WA counties
 counties <- counties %>%
-  filter(parent.location == "Washington")
+  filter(parent.location == "Washington") %>% 
+  select(-pct.multiple, -pct.other)
 
 counties_long <- gather(counties,
                         key = race,
                         value = pct.pop,
-                        c(pct.white:pct.other )
+                        c(pct.white:pct.nh.pi )
                         )
 
+
+counties_2016 <- counties %>% 
+  filter(year == "2016")
+
+ggplot(data = counties_2016) +
+  geom_point(mapping = aes(x = pct.white, y = eviction.rate))
 years <- unique(counties_long$year)
 
 eviction_rate_range <- range(counties_long$eviction.rate, na.rm = TRUE)
@@ -71,7 +78,7 @@ server <- function(input, output) {
     results_data <- counties_long[counties_long$year == input$year, ]
 
     ggplot(data = results_data, mapping = aes(x = pct.pop, y = eviction.rate)) +
-      geom_point(aes(color = (race %in% data$selected_racial), size = 2)) +
+      geom_point(aes(color = (race %in% data$selected_racial))) +
       guides(color = FALSE)
 
   })
