@@ -8,13 +8,12 @@ library(tidyr)
 ### Read in and Clean Data
 
 counties <- read.csv("data/evictionlab-us-counties.csv", stringsAsFactors = FALSE)
-cities <- read.csv("data/cities.csv", stringsAsFactors = FALSE)
 
 
 # WA counties
 counties <- counties %>%
   filter(parent.location == "Washington") %>% 
-  select(-pct.multiple, -pct.other)
+  select(year, name, population, poverty.rate, rent.burden, eviction.rate)
 
 
 years <- unique(counties$year)
@@ -40,8 +39,10 @@ ui <- fluidPage(
   mainPanel(
     tabsetPanel(type = "tabs",
                 tabPanel("Plot", plotOutput("plot", click = "plot_click"),
-                         p("Highlighting:", strong(textOutput("selected", inline = TRUE))
-                           )),
+                         p("This plot shows eviction data for", strong(textOutput("selected_year", inline = TRUE)))
+                         ),
+                p("Highlighting:", strong(textOutput("selected", inline = TRUE))
+                ),
                 tabPanel("Table", dataTableOutput("table")),
                 tabPanel("Dataset Information",
                          p("This research uses data from The Eviction Lab at Princeton University,
@@ -63,27 +64,32 @@ server <- function(input, output) {
 
   output$plot <- renderPlot({
 
-    results_data <- counties %>%
+    
+
+    results_data <- counties[counties$year == input$year, ] 
+    
+    results_data <- results_data %>%
       filter(eviction.rate >= input$eviction_rate[1] & eviction.rate <= input$eviction_rate[2])
 
-    results_data <- counties[counties$year == input$year, ]
-
     ggplot(data = results_data, mapping = aes(x = poverty.rate, y = eviction.rate)) +
-      geom_point(aes(color = (name %in% data$selected_county))) +
+      geom_point(aes(color = (name %in% data$selected_county), size = 2)) +
       guides(color = FALSE)
 
   })
 
   output$table <- renderDataTable({
-    results_data <- counties %>%
-      filter(eviction.rate >= input$eviction_rate[1] & eviction.rate <= input$eviction_rate[2])
-
     results_data <- counties[counties$year == input$year, ]
+    
+    results_data <- results_data %>%
+      filter(eviction.rate >= input$eviction_rate[1] & eviction.rate <= input$eviction_rate[2])
+    
     results_data
 
 
   })
 
+  output$selected_year <- renderText({input$year})
+  
   output$selected <- renderText({
     data$selected_county
 
@@ -92,15 +98,16 @@ server <- function(input, output) {
   observeEvent(input$plot_click, {
     selected <- nearPoints(counties, input$plot_click)
     data$selected_county <- 
-      paste(unique(selected$name), 
-             "Population:", unique(selected$population),
+      paste(unique(selected$name),
+             "Population:", unique(selected$population), 
              "Poverty Rate: ", unique(selected$poverty.rate),
-             "Rent Burden: ", unique(selected$rent.burden), 
-            "Eviction Rate: ", unique(selected$eviction.rate),
-            sep = "\n"
+             "Rent Burden: ", unique(selected$rent.burden),
+            "Eviction Rate: ", unique(selected$eviction.rate)
             )
 
   })
+ 
+  
 
 }
 
