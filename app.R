@@ -8,6 +8,7 @@ library(tidyr)
 ### Read in and Clean Data
 
 counties <- read.csv("data/evictionlab-us-counties.csv", stringsAsFactors = FALSE)
+cities <- read.csv("data/cities.csv", stringsAsFactors = FALSE)
 
 
 # WA counties
@@ -15,21 +16,10 @@ counties <- counties %>%
   filter(parent.location == "Washington") %>% 
   select(-pct.multiple, -pct.other)
 
-counties_long <- gather(counties,
-                        key = race,
-                        value = pct.pop,
-                        c(pct.white:pct.nh.pi )
-                        )
 
+years <- unique(counties$year)
 
-counties_2016 <- counties %>% 
-  filter(year == "2016")
-
-ggplot(data = counties_2016) +
-  geom_point(mapping = aes(x = pct.white, y = eviction.rate))
-years <- unique(counties_long$year)
-
-eviction_rate_range <- range(counties_long$eviction.rate, na.rm = TRUE)
+eviction_rate_range <- range(counties$eviction.rate, na.rm = TRUE)
 
 
 ui <- fluidPage(
@@ -68,39 +58,39 @@ ui <- fluidPage(
 server <- function(input, output) {
 
   data <- reactiveValues()
-  data$selected_racial <- ""
+  data$selected_county <- ""
 
   output$plot <- renderPlot({
 
-    results_data <- counties_long %>%
+    results_data <- counties %>%
       filter(eviction.rate >= input$eviction_rate[1] & eviction.rate <= input$eviction_rate[2])
 
-    results_data <- counties_long[counties_long$year == input$year, ]
+    results_data <- counties[counties$year == input$year, ]
 
-    ggplot(data = results_data, mapping = aes(x = pct.pop, y = eviction.rate)) +
-      geom_point(aes(color = (race %in% data$selected_racial))) +
+    ggplot(data = results_data, mapping = aes(x = poverty.rate, y = eviction.rate)) +
+      geom_point(aes(color = (name %in% data$selected_county))) +
       guides(color = FALSE)
 
   })
 
   output$table <- renderDataTable({
-    results_data <- counties_long %>%
+    results_data <- counties %>%
       filter(eviction.rate >= input$eviction_rate[1] & eviction.rate <= input$eviction_rate[2])
 
-    results_data <- counties_long[counties_long$year == input$year, ]
+    results_data <- counties[counties$year == input$year, ]
     results_data
 
 
   })
 
   output$selected <- renderText({
-    data$selected_racial
+    data$selected_county
 
   })
 
   observeEvent(input$plot_click, {
-    selected <- nearPoints(counties_long, input$plot_click)
-    data$selected_racial <- unique(selected$race)
+    selected <- nearPoints(counties, input$plot_click)
+    data$selected_county <- unique(selected$name)
 
   })
 
