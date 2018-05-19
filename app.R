@@ -21,7 +21,6 @@ counties_long <- gather(counties,
                         )
 
 years <- unique(counties_long$year)
-races <- unique(counties_long$race)
 
 eviction_rate_range <- range(counties_long$eviction.rate, na.rm = TRUE)
 
@@ -30,8 +29,7 @@ ui <- fluidPage(
   titlePanel("Eviction Rates"),
 
   sidebarLayout(
-    #selectInput("year", label = "Select Year", choices = years),
-    selectInput("race", label = "Select Race", choices = races),
+    selectInput("year", label = "Select Year", choices = years),
 
     sliderInput("eviction_rate",
                 label = "Eviction Rate",
@@ -63,17 +61,17 @@ ui <- fluidPage(
 server <- function(input, output) {
 
   data <- reactiveValues()
-  data$selected_year <- ""
+  data$selected_racial <- ""
 
   output$plot <- renderPlot({
 
     results_data <- counties_long %>%
       filter(eviction.rate >= input$eviction_rate[1] & eviction.rate <= input$eviction_rate[2])
 
-    results_data <- counties_long[counties_long$race == input$race, ]
+    results_data <- counties_long[counties_long$year == input$year, ]
 
-    ggplot(data = results_data, mapping = aes(x = poverty.rate, y = eviction.rate)) +
-      geom_point(aes(color = (year %in% data$selected_year), size = 5)) +
+    ggplot(data = results_data, mapping = aes(x = pct.pop, y = eviction.rate)) +
+      geom_point(aes(color = (race %in% data$selected_racial), size = 2)) +
       guides(color = FALSE)
 
   })
@@ -82,25 +80,24 @@ server <- function(input, output) {
     results_data <- counties_long %>%
       filter(eviction.rate >= input$eviction_rate[1] & eviction.rate <= input$eviction_rate[2])
 
-    results_data <- counties_long[counties_long$race == input$race, ]
+    results_data <- counties_long[counties_long$year == input$year, ]
     results_data
 
 
   })
 
   output$selected <- renderText({
-    data$selected_year
+    data$selected_racial
 
   })
 
   observeEvent(input$plot_click, {
     selected <- nearPoints(counties_long, input$plot_click)
-    data$selected_year <- unique(selected$year)
+    data$selected_racial <- unique(selected$race)
 
   })
 
 }
-
 
 shinyApp(ui, server)
 
