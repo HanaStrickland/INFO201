@@ -1,3 +1,14 @@
+counties <- read.csv("data/evictionlab-us-counties.csv", stringsAsFactors = FALSE)
+
+counties <- counties %>%
+  filter(parent.location == "Washington") %>%
+  select(year, name, population, poverty.rate, rent.burden, eviction.rate)
+
+years <- unique(counties$year)
+
+eviction_rate_range <- range(counties$eviction.rate, na.rm = TRUE)
+
+### UI
 ui <- fluidPage( 
   titlePanel("Eviction Rates in Washington by County"),
   
@@ -21,8 +32,9 @@ ui <- fluidPage(
                                    strong(textOutput("selected_year_plot", inline = TRUE)), ". There seems to be a 
                                    low to negligible correlation between rent burden and eviction rate."
                 ),
-                plotOutput("plot", brush = "plot_brush"),
-                p("Highlighting:", strong(textOutput("selected", inline = TRUE))
+                #plotOutput("plot", brush = "plot_brush"),
+                plotOutput("plot", click = "plot_click"),
+                p(htmlOutput("selected", inline = TRUE)
                 ),
                 verbatimTextOutput("info")
                 ),

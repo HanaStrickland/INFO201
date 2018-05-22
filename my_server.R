@@ -1,7 +1,19 @@
+counties <- read.csv("data/evictionlab-us-counties.csv", stringsAsFactors = FALSE)
+
+counties <- counties %>%
+  filter(parent.location == "Washington") %>%
+  select(year, name, population, poverty.rate, rent.burden, eviction.rate)
+
+years <- unique(counties$year)
+
+eviction_rate_range <- range(counties$eviction.rate, na.rm = TRUE)
+
+### SERVER
 server <- function(input, output) {
   
   data <- reactiveValues()
   data$selected_county <- ""
+  
   
   output$plot <- renderPlot({
     
@@ -39,28 +51,53 @@ server <- function(input, output) {
   output$selected_year_table <- renderText({input$year})
   
   
-  output$selected <- renderText({
+  output$selected <- renderUI({
     data$selected_county
     
   })
   
-  observeEvent(input$plot_brush, {
-    selected <- brushedPoints(counties, input$plot_brush)
+  observeEvent(input$plot_click, {
+    selected <- nearPoints(counties, input$plot_click)
     selected <- filter(selected, year == input$year)
+    
     selected <- as.vector(selected)
-    
-    
+
     
     data$selected_county <-
-      paste(selected[2], "\n",
-            "Population: ", selected[3], "\n",
-            "Poverty Rate: ", selected[4], "\n",
-            "Rent Burden: ", selected[5], "\n",
-            "Eviction Rate: ", selected[6])
+      HTML(paste(
+       "Highlighting ", strong(unique(selected[2])), "<br>",
+        em("Population: ", selected[3]), "<br>",
+        em("Poverty Rate: ", selected[4]), "<br>",
+        em("Rent Burden: ", selected[5]), "<br>",
+        em("Eviction Rate: ", selected[6])
+            )
+       )
+    
+   
     
   })
   
   
   
 }
+
+#Trying to separate renderText from color =, trying to highlight datapoint
+
+#data$selected_info <- ""
+
+# output$selected <- renderText({
+#   data$selected_info
+#   
+# })
+
+
+# data$selected_info <-
+#   paste(unique(selected[2]),
+#         "Population: ", selected[3],
+#         "Poverty Rate: ", selected[4],
+#         "Rent Burden: ", selected[5],
+#         "Eviction Rate: ", selected[6]
+#   )
+
+
 
