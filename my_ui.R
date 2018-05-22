@@ -14,7 +14,7 @@ ui <- fluidPage(
   
   sidebarLayout(
     
-    selectInput("year", label = "Select Year", choices = years, multiple = F),
+    selectInput("year", label = "Select Year", choices = years),
     
     sliderInput("eviction_rate",
                 label = "Eviction Rate",
@@ -35,8 +35,8 @@ ui <- fluidPage(
                 #plotOutput("plot", brush = "plot_brush"),
                 plotOutput("plot", click = "plot_click"),
                 p(htmlOutput("selected", inline = TRUE)
-                ),
-                verbatimTextOutput("info")
+                  )
+              
                 ),
                 
                 tabPanel("Table", 

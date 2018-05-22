@@ -1,18 +1,9 @@
-counties <- read.csv("data/evictionlab-us-counties.csv", stringsAsFactors = FALSE)
-
-counties <- counties %>%
-  filter(parent.location == "Washington") %>%
-  select(year, name, population, poverty.rate, rent.burden, eviction.rate)
-
-years <- unique(counties$year)
-
-eviction_rate_range <- range(counties$eviction.rate, na.rm = TRUE)
-
 ### SERVER
 server <- function(input, output) {
   
   data <- reactiveValues()
   data$selected_county <- ""
+  data$selected_info <- ""
   
   
   output$plot <- renderPlot({
@@ -52,7 +43,7 @@ server <- function(input, output) {
   
   
   output$selected <- renderUI({
-    data$selected_county
+    data$selected_info
     
   })
   
@@ -61,10 +52,13 @@ server <- function(input, output) {
     selected <- filter(selected, year == input$year)
     
     selected <- as.vector(selected)
+    
+    data$selected_county <- paste(selected$name)
 
     
-    data$selected_county <-
-      HTML(paste(
+    data$selected_info <-
+      HTML(
+        paste(
        "Highlighting ", strong(unique(selected[2])), "<br>",
         em("Population: ", selected[3]), "<br>",
         em("Poverty Rate: ", selected[4]), "<br>",
@@ -72,32 +66,12 @@ server <- function(input, output) {
         em("Eviction Rate: ", selected[6])
             )
        )
-    
-   
-    
   })
   
   
   
 }
 
-#Trying to separate renderText from color =, trying to highlight datapoint
-
-#data$selected_info <- ""
-
-# output$selected <- renderText({
-#   data$selected_info
-#   
-# })
-
-
-# data$selected_info <-
-#   paste(unique(selected[2]),
-#         "Population: ", selected[3],
-#         "Poverty Rate: ", selected[4],
-#         "Rent Burden: ", selected[5],
-#         "Eviction Rate: ", selected[6]
-#   )
 
 
 
