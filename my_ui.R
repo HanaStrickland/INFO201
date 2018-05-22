@@ -1,13 +1,8 @@
-# library(shiny)
-# library(ggplot2)
-# library(dplyr)
-# library(maps)
-# library(tidyr)
-
-ui <- fluidPage(
+ui <- fluidPage( 
   titlePanel("Eviction Rates in Washington by County"),
   
   sidebarLayout(
+    
     selectInput("year", label = "Select Year", choices = years, multiple = F),
     
     sliderInput("eviction_rate",
@@ -54,5 +49,3 @@ ui <- fluidPage(
     )
   )
   )
-
-#shinyUI(ui)

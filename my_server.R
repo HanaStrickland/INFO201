@@ -1,36 +1,9 @@
-library(shiny)
-library(ggplot2)
-library(dplyr)
-library(maps)
-library(tidyr)
-
-# Can't get year isolated in ObserveEvent
-# Want "selected" to be on multiple lines
-
-
-### Read in and Clean Data
-
-# counties <- read.csv("data/evictionlab-us-counties.csv", stringsAsFactors = FALSE)
-# 
-# 
-# # WA counties
-# counties <- counties %>%
-#   filter(parent.location == "Washington") %>% 
-#   select(year, name, population, poverty.rate, rent.burden, eviction.rate)
-# 
-# years <- unique(counties$year)
-# 
-# eviction_rate_range <- range(counties$eviction.rate, na.rm = TRUE)
-
-
 server <- function(input, output) {
   
   data <- reactiveValues()
   data$selected_county <- ""
   
   output$plot <- renderPlot({
-    
-    
     
     results_data <- counties[counties$year == input$year, ] 
     
@@ -79,10 +52,10 @@ server <- function(input, output) {
     
     
     data$selected_county <-
-      paste(selected[2], 
-            "Population: ", selected[3],
-            "Poverty Rate: ", selected[4],
-            "Rent Burden: ", selected[5], 
+      paste(selected[2], "\n",
+            "Population: ", selected[3], "\n",
+            "Poverty Rate: ", selected[4], "\n",
+            "Rent Burden: ", selected[5], "\n",
             "Eviction Rate: ", selected[6])
     
   })
@@ -91,4 +64,3 @@ server <- function(input, output) {
   
 }
 
-#shinyServer(server)
