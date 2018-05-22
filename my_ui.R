@@ -14,8 +14,10 @@ ui <- fluidPage(
   
   sidebarLayout(
     
-    selectInput("year", label = "Select Year", choices = years),
+    # widget selects year
+    selectInput("year", label = "Select Year", choices = years), 
     
+    # widget filters for eviction rate
     sliderInput("eviction_rate",
                 label = "Eviction Rate",
                 min = eviction_rate_range[1],
@@ -31,8 +33,7 @@ ui <- fluidPage(
                                    (the percentage of income spent on rent) and eviction rate for", 
                                    strong(textOutput("selected_year_plot", inline = TRUE)), ". There seems to be a 
                                    low to negligible correlation between rent burden and eviction rate."
-                ),
-                #plotOutput("plot", brush = "plot_brush"),
+                ), 
                 plotOutput("plot", click = "plot_click"),
                 p(htmlOutput("selected", inline = TRUE)
                   )

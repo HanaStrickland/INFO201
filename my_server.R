@@ -8,8 +8,10 @@ server <- function(input, output) {
   
   output$plot <- renderPlot({
     
+    # select year
     results_data <- counties[counties$year == input$year, ] 
     
+    #filter for eviction rate
     results_data <- results_data %>%
       filter(eviction.rate >= input$eviction_rate[1] & eviction.rate <= input$eviction_rate[2])
     
@@ -38,10 +40,11 @@ server <- function(input, output) {
     
   })
   
+  # part of parapgraph above plot/table that lets users know what year they're looking at
   output$selected_year_plot <- renderText({input$year})
   output$selected_year_table <- renderText({input$year})
   
-  
+  # renders info that appears below the plot
   output$selected <- renderUI({
     data$selected_info
     
@@ -49,13 +52,13 @@ server <- function(input, output) {
   
   observeEvent(input$plot_click, {
     selected <- nearPoints(counties, input$plot_click)
-    selected <- filter(selected, year == input$year)
+    selected <- filter(selected, year == input$year) # filters for year picked in the dropdown menu
     
     selected <- as.vector(selected)
     
-    data$selected_county <- paste(selected$name)
+    data$selected_county <- paste(selected$name) # used to highlight datapoint selected in a different color
 
-    
+    # info that appears below the plot
     data$selected_info <-
       HTML(
         paste(
