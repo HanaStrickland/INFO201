@@ -30,10 +30,13 @@ server <- function(input, output) {
   })
   
   output$table <- renderDataTable({
+    
     results_data <- counties[counties$year == input$year, ]
     
     results_data <- results_data %>%
       filter(eviction.rate >= input$eviction_rate[1] & eviction.rate <= input$eviction_rate[2])
+    
+    colnames(results_data) <- c("Year", "County", "Population", "Poverty Rate", "Rent Burden", "Eviction Rate")
     
     results_data
     
