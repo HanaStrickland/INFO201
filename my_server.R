@@ -39,7 +39,7 @@ server <- function(input, output) {
     
     results_data <- results_data()
     
-    colnames(results_data) <- c("Year", "County", "Population", "Poverty Rate", "Rent Burden", "Eviction Rate")
+    colnames(results_data) <- c("Year", "County", "Population", "Poverty Rate (%)", "Rent Burden (%)", "Eviction Rate")
     
     results_data
     
