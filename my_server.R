@@ -2,9 +2,10 @@
 server <- function(input, output) {
   
   data <- reactiveValues()
-  data$selected_county <- ""
-  data$selected_info <- ""
+  data$selected_county <- ""   # for highlighting county on data point
+  data$selected_info <- ""     # for giving info below plot
   
+  # Adjusts plot and table via widgets
   results_data <- reactive({
     
     results <- counties[counties$year == input$year, ]
