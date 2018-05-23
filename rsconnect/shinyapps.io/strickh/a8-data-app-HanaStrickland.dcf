@@ -5,9 +5,9 @@ account: strickh
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 345060
-bundleId: 1385997
+bundleId: 1388191
 url: https://strickh.shinyapps.io/a8-data-app-HanaStrickland/
-when: 1526960722.03122
+when: 1527043503.87059
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: data/cities.csv|data/evictionlab-us-states.csv
